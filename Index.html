@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Amigo Secreto 🎁</title>
+    <style>
+        :root {
+            --primary: #c0392b; /* Vermelho Natal */
+            --secondary: #27ae60; /* Verde Natal */
+            --bg: #f4f4f4;
+            --card-bg: #ffffff;
+            --text: #333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        main {
+            flex: 1; /* Garante que o conteúdo ocupe o espaço e empurre o rodapé */
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: var(--primary);
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        /* Controles (Busca e Adicionar) */
+        .controls {
+            max-width: 800px;
+            margin: 0 auto 30px auto;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        input[type="text"] {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            flex: 1;
+            min-width: 200px;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: var(--secondary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background-color: #219150;
+        }
+
+        /* Grid de Cartões */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-top: 5px solid var(--primary);
+            transition: transform 0.2s;
+            position: relative;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h2 {
+            margin-top: 0;
+            color: var(--primary);
+            font-size: 1.4rem;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            padding-right: 20px; /* Espaço para o botão de fechar */
+        }
+
+        .card p {
+            line-height: 1.6;
+            color: #555;
+            white-space: pre-line; /* Mantém quebras de linha */
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: transparent;
+            color: #999;
+            padding: 5px;
+            font-size: 14px;
+            line-height: 1;
+        }
+        .delete-btn:hover {
+            background: #ffebeb;
+            color: red;
+        }
+
+        /* Modal para Adicionar */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            min-height: 80px;
+            resize: vertical;
+            font-family: inherit;
+            box-sizing: border-box;
+        }
+        
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-cancel {
+            background-color: #7f8c8d;
+        }
+
+        /* Rodapé */
+        footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #777;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+        footer a {
+            color: #333;
+            text-decoration: none;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s;
+        }
+        footer a:hover {
+            color: var(--primary);
+        }
+        footer svg {
+            width: 18px;
+            height: 18px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <main>
+        <header>
+            <h1>🎅 Lista de Amigo Secreto</h1>
+            <p>Confira as sugestões de presentes da galera!</p>
+        </header>
+
+        <div class="controls">
+            <input type="text" id="searchInput" placeholder="Buscar participante..." onkeyup="filterCards()">
+            <button onclick="openModal()">+ Adicionar Pessoa</button>
+        </div>
+
+        <div class="grid-container" id="cardsContainer">
+            </div>
+    </main>
+
+    <footer>
+        <p>Desenvolvido por 
+            <a href="https://instagram.com/gabriel.alac" target="_blank" rel="noopener noreferrer">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M8 0C5.829 0 5.556.01 4.703.048 3.85.088 3.269.222 2.76.42a3.917 3.917 0 0 0-1.417.923A3.927 3.927 0 0 0 .42 2.76C.222 3.268.087 3.85.048 4.7.01 5.555 0 5.827 0 8.001c0 2.172.01 2.444.048 3.297.04.852.174 1.433.372 1.942.205.526.478.972.923 1.417.444.445.89.719 1.416.923.51.198 1.09.333 1.942.372C5.555 15.99 5.827 16 8 16s2.444-.01 3.298-.048c.851-.04 1.434-.174 1.943-.372a3.916 3.916 0 0 0 1.416-.923c.445-.445.718-.891.923-1.417.198-.51.332-1.09.372-1.942C15.99 10.445 16 10.173 16 8s-.01-2.445-.048-3.299c-.04-.851-.175-1.433-.372-1.941a3.926 3.926 0 0 0-.923-1.417A3.911 3.911 0 0 0 13.24.42c-.51-.198-1.092-.333-1.943-.372C10.443.01 10.172 0 8 0zm0 1.44c2.136 0 2.415.01 3.269.048.79.037 1.216.175 1.505.287.384.15.657.328.936.607.279.279.457.552.607.936.112.289.25.715.287 1.505.039.853.048 1.132.048 3.269 0 2.137-.01 2.415-.048 3.269-.037.79-.175 1.216-.287 1.505-.15.384-.328.657-.607.936-.279.279-.552.457-.936.607-.289.112-.715.25-1.505.287-.853.039-1.132.048-3.269.048-2.137 0-2.415-.01-3.269-.048-.79-.037-1.216-.175-1.505-.287-.384-.15-.657-.328-.936-.607-.279-.279-.457-.552-.607-.936-.112-.289-.25-.715-.287-1.505-.039-.853-.048-1.132-.048-3.269 0-2.137.01-2.415.048-3.269.037-.79.175-1.216.287-1.505.15-.384.328-.657.607-.936.279-.279.552-.457.936-.607.289-.112.715-.25 1.505-.287.853-.039 1.132-.048 3.269-.048z"/>
+                    <path d="M8 4.197a3.803 3.803 0 1 0 0 7.606 3.803 3.803 0 0 0 0-7.606zm0 1.44a2.363 2.363 0 1 1 0 4.727 2.363 2.363 0 0 1 0-4.727z"/>
+                    <path d="M12.397 4.914a1.059 1.059 0 1 0-2.118 0 1.059 1.059 0 0 0 2.118 0z"/>
+                </svg>
+                gabriel.alac
+            </a>
+        </p>
+    </footer>
+
+    <div class="modal" id="addModal">
+        <div class="modal-content">
+            <h2 style="margin-top:0">Novo Participante</h2>
+            <div class="form-group">
+                <label for="newName">Nome:</label>
+                <input type="text" id="newName" placeholder="Ex: Maria" style="width: 100%; box-sizing: border-box;">
+            </div>
+            <div class="form-group">
+                <label for="newGifts">Sugestões de Presente:</label>
+                <textarea id="newGifts" placeholder="Ex: Chinelo 36, Camiseta P..."></textarea>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+                <button onclick="addParticipant()">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Lista inicial baseada no que você enviou
+        const initialList = [
+            { name: "Fran", gifts: "Blusinha G, chinelo 39 ou coisas pra mim" },
+            { name: "Vini", gifts: "Camisa M\nChinelo branco 40 41\nKit de raquete de tênis de mesa" },
+            { name: "Amanda", gifts: "CANECA\nCAMISETA M OU P (dependendo se for mais over)\nQualquer produto de skin care, maquiagem ou acessório" },
+            { name: "Thainara", gifts: "Camiseta M, gloss, bolsa, copo térmico, necessaire." },
+            { name: "Kati", gifts: "Chinelo 37, rímel, creme de mão, chocolate preto, acessório" },
+            { name: "Lucas", gifts: "Chinelo branco 42, camiseta G, caneca ou relógio" },
+            { name: "Jhonatan", gifts: "Bermuda GG-46, garrafa ou chinelo 42" },
+            { name: "Ismael", gifts: "Havaianas branco 41-42" },
+            { name: "Samara", gifts: "Havaianas branca 37\nGloss, acessório" },
+            { name: "Ticiane", gifts: "Maquiagem, creme, acessório, blusinha M" },
+            { name: "Gustavo", gifts: "Chinelo 42, camiseta GG, boné" },
+            { name: "Simara", gifts: "Chinelo ou rasteirinha N37\nCoisas pra mim (não gosto de coisa de casa)" },
+            { name: "Diego", gifts: "Camiseta G1, Chinelo 43" },
+            { name: "João Miguel", gifts: "Chinelo 43, Camiseta GG" },
+            { name: "Daniel", gifts: "Camiseta G1, chinelo 45, copo térmico" },
+            { name: "Karol", gifts: "Qualquer tipo de perfume (tô sem), até bodysplash tá valendo" },
+            { name: "Alex", gifts: "Boné Trucker, Gravata, camiseta GG ou G1 e etc" },
+            { name: "Anita", gifts: "Laço ou presilha de cabelo, creme, maquiagem, livro" },
+            { name: "Josiel", gifts: "Chinelo branco 43, 44" },
+            { name: "Gabriela", gifts: "Chinelo 37, creme de mão" },
+            { name: "Kaynan", gifts: "Havaianas branco 41-42" },
+            { name: "Airam", gifts: "Chinelo branco 39-40, camisa M branca" },
+            { name: "Ebenezer", gifts: "Chinelo 38, camisa G" }
+        ];
+
+        // Tenta pegar do localStorage ou usa a lista inicial
+        let participants = JSON.parse(localStorage.getItem('amigoSecretoData')) || initialList;
+
+        const container = document.getElementById('cardsContainer');
+        const modal = document.getElementById('addModal');
+
+        // Função para desenhar os cartões na tela
+        function renderCards(filterText = '') {
+            container.innerHTML = '';
+            
+            participants.forEach((person, index) => {
+                // Filtro de busca
+                if (person.name.toLowerCase().includes(filterText.toLowerCase())) {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.innerHTML = `
+                        <button class="delete-btn" onclick="removeParticipant(${index})" title="Remover">✕</button>
+                        <h2>${person.name}</h2>
+                        <p>${person.gifts}</p>
+                    `;
+                    container.appendChild(card);
+                }
+            });
+        }
+
+        // Função de busca
+        function filterCards() {
+            const text = document.getElementById('searchInput').value;
+            renderCards(text);
+        }
+
+        // Funções do Modal
+        function openModal() {
+            modal.style.display = 'flex';
+            document.getElementById('newName').value = '';
+            document.getElementById('newGifts').value = '';
+            document.getElementById('newName').focus();
+        }
+
+        function closeModal() {
+            modal.style.display = 'none';
+        }
+
+        // Adicionar novo participante
+        function addParticipant() {
+            const name = document.getElementById('newName').value;
+            const gifts = document.getElementById('newGifts').value;
+
+            if (name && gifts) {
+                participants.push({ name, gifts });
+                saveAndRender();
+                closeModal();
+            } else {
+                alert('Por favor, preencha o nome e as sugestões.');
+            }
+        }
+
+        // Remover participante
+        function removeParticipant(index) {
+            if(confirm('Tem certeza que deseja remover essa pessoa da lista?')) {
+                participants.splice(index, 1);
+                saveAndRender();
+            }
+        }
+
+        // Salvar no navegador e atualizar tela
+        function saveAndRender() {
+            localStorage.setItem('amigoSecretoData', JSON.stringify(participants));
+            renderCards(document.getElementById('searchInput').value);
+        }
+
+        // Fechar modal se clicar fora
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+
+        // Renderização inicial
+        renderCards();
+
+    </script>
+</body>
+</html>
